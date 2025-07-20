@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Shield, CheckCircle, AlertCircle, Trophy, Share2, Download, Eye, Clock } from 'lucide-react';
+import { ArrowLeft, Shield, CheckCircle, AlertCircle, Trophy, Share2, Download, Eye, Clock, Copy, QrCode, Link, Mail, MessageSquare } from 'lucide-react';
 import { Credential } from '../../types';
 
 interface CredentialViewerProps {
@@ -17,6 +17,8 @@ export const CredentialViewer: React.FC<CredentialViewerProps> = ({
 }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<'success' | 'error' | null>(null);
+  const [showShareOptions, setShowShareOptions] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const isVerified = verifiedCredentials.includes(credential.id);
 
@@ -44,6 +46,113 @@ export const CredentialViewer: React.FC<CredentialViewerProps> = ({
     }
   };
 
+  const generateShareUrl = () => {
+    // Generate a shareable URL for the credential
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/credential/${credential.id}?share=true`;
+  };
+
+  const generateVerificationUrl = () => {
+    // Generate a verification URL that can be used to verify the credential
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/verify/${credential.hash}`;
+  };
+
+  const handleShare = async (method: 'copy' | 'qr' | 'link' | 'email' | 'message') => {
+    const shareUrl = generateShareUrl();
+    const verificationUrl = generateVerificationUrl();
+    
+    switch (method) {
+      case 'copy':
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          setShareCopied(true);
+          setTimeout(() => setShareCopied(false), 2000);
+        } catch (err) {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = shareUrl;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          setShareCopied(true);
+          setTimeout(() => setShareCopied(false), 2000);
+        }
+        break;
+      
+      case 'qr':
+        // Generate QR code for sharing
+        const qrData = JSON.stringify({
+          type: 'credential',
+          id: credential.id,
+          hash: credential.hash,
+          verificationUrl: verificationUrl,
+          title: credential.title,
+          issuer: credential.issuer.name
+        });
+        // You can implement QR code generation here
+        console.log('QR Code Data:', qrData);
+        break;
+      
+      case 'link':
+        // Open verification URL in new tab
+        window.open(verificationUrl, '_blank');
+        break;
+      
+      case 'email':
+        // Open email client with credential details
+        const subject = encodeURIComponent(`Credential Verification: ${credential.title}`);
+        const body = encodeURIComponent(`
+Credential Details:
+- Title: ${credential.title}
+- Issuer: ${credential.issuer.name}
+- Verification URL: ${verificationUrl}
+- Credential Hash: ${credential.hash}
+        `);
+        window.open(`mailto:?subject=${subject}&body=${body}`);
+        break;
+      
+      case 'message':
+        // For mobile devices, this could open SMS or messaging apps
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: credential.title,
+              text: `Check out my verified credential: ${credential.title} from ${credential.issuer.name}`,
+              url: verificationUrl
+            });
+          } catch (err) {
+            console.log('Share cancelled or failed');
+          }
+        } else {
+          // Fallback to copy
+          handleShare('copy');
+        }
+        break;
+    }
+  };
+
+  const handleDownload = () => {
+    // Generate a downloadable version of the credential
+    const credentialData = {
+      ...credential,
+      shareUrl: generateShareUrl(),
+      verificationUrl: generateVerificationUrl(),
+      downloadedAt: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(credentialData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${credential.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_credential.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-black">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -66,8 +175,80 @@ export const CredentialViewer: React.FC<CredentialViewerProps> = ({
                 <div className="text-yellow-400 text-sm">🎖️ {credential.achievement}</div>
               )}
             </div>
+            <button
+              onClick={() => setShowShareOptions(!showShareOptions)}
+              className="p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl transition-all duration-200 hover:scale-105"
+            >
+              <Share2 className="w-5 h-5 text-neutral-400" />
+            </button>
           </div>
         </div>
+
+        {/* Share Options Dropdown */}
+        {showShareOptions && (
+          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 mb-6 animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">Share Credential</h3>
+              <button
+                onClick={() => setShowShareOptions(false)}
+                className="text-neutral-400 hover:text-white transition-colors"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <button
+                onClick={() => handleShare('copy')}
+                className="flex flex-col items-center space-y-2 p-4 bg-neutral-900 hover:bg-neutral-800 rounded-xl transition-all duration-200 hover:scale-105"
+              >
+                <Copy className="w-6 h-6 text-cyan-400" />
+                <span className="text-sm text-neutral-300">
+                  {shareCopied ? 'Copied!' : 'Copy Link'}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => handleShare('qr')}
+                className="flex flex-col items-center space-y-2 p-4 bg-neutral-900 hover:bg-neutral-800 rounded-xl transition-all duration-200 hover:scale-105"
+              >
+                <QrCode className="w-6 h-6 text-purple-400" />
+                <span className="text-sm text-neutral-300">QR Code</span>
+              </button>
+              
+              <button
+                onClick={() => handleShare('link')}
+                className="flex flex-col items-center space-y-2 p-4 bg-neutral-900 hover:bg-neutral-800 rounded-xl transition-all duration-200 hover:scale-105"
+              >
+                <Link className="w-6 h-6 text-green-400" />
+                <span className="text-sm text-neutral-300">Open Link</span>
+              </button>
+              
+              <button
+                onClick={() => handleShare('email')}
+                className="flex flex-col items-center space-y-2 p-4 bg-neutral-900 hover:bg-neutral-800 rounded-xl transition-all duration-200 hover:scale-105"
+              >
+                <Mail className="w-6 h-6 text-blue-400" />
+                <span className="text-sm text-neutral-300">Email</span>
+              </button>
+              
+              <button
+                onClick={() => handleShare('message')}
+                className="flex flex-col items-center space-y-2 p-4 bg-neutral-900 hover:bg-neutral-800 rounded-xl transition-all duration-200 hover:scale-105"
+              >
+                <MessageSquare className="w-6 h-6 text-pink-400" />
+                <span className="text-sm text-neutral-300">Message</span>
+              </button>
+            </div>
+            
+            <div className="mt-4 p-3 bg-neutral-900 rounded-lg">
+              <div className="text-xs text-neutral-400 mb-2">Verification URL:</div>
+              <div className="text-sm text-white font-mono break-all">
+                {generateVerificationUrl()}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Credential Card */}
         <div className="bg-gradient-to-br from-neutral-950 to-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
@@ -108,7 +289,7 @@ export const CredentialViewer: React.FC<CredentialViewerProps> = ({
                 <h3 className="text-lg font-bold text-white">Issuer Information</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Organization:</span>
+                    <span className="text-neutral-400 mr-4">Organization:</span>
                     <span className="text-white font-semibold">{credential.issuer.name}</span>
                   </div>
                   <div className="flex justify-between">
@@ -200,6 +381,23 @@ export const CredentialViewer: React.FC<CredentialViewerProps> = ({
                   </div>
                 </div>
               </div>
+              
+              <div className="flex items-center justify-center space-x-4 mt-6">
+                <button
+                  onClick={() => setShowShareOptions(true)}
+                  className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Share2 className="w-5 h-5" />
+                  <span>Share Credential</span>
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="inline-flex items-center space-x-2 bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>Download</span>
+                </button>
+              </div>
             </div>
           ) : isVerified ? (
             /* Already Verified */
@@ -210,11 +408,17 @@ export const CredentialViewer: React.FC<CredentialViewerProps> = ({
                 This credential has already been verified and is ready to use.
               </p>
               <div className="flex items-center justify-center space-x-4">
-                <button className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <button
+                  onClick={() => setShowShareOptions(true)}
+                  className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
                   <Share2 className="w-5 h-5" />
                   <span>Share Credential</span>
                 </button>
-                <button className="inline-flex items-center space-x-2 bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <button
+                  onClick={handleDownload}
+                  className="inline-flex items-center space-x-2 bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
                   <Download className="w-5 h-5" />
                   <span>Download</span>
                 </button>
@@ -266,6 +470,23 @@ export const CredentialViewer: React.FC<CredentialViewerProps> = ({
                   <p className="text-neutral-500 text-sm mt-4">
                     This will check the credential against the IOTA Tangle for authenticity
                   </p>
+                  
+                  <div className="flex items-center justify-center space-x-4 mt-6">
+                    <button
+                      onClick={() => setShowShareOptions(true)}
+                      className="inline-flex items-center space-x-2 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <Share2 className="w-5 h-5" />
+                      <span>Share Credential</span>
+                    </button>
+                    <button
+                      onClick={handleDownload}
+                      className="inline-flex items-center space-x-2 bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <Download className="w-5 h-5" />
+                      <span>Download</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
