@@ -20,112 +20,65 @@ function CreateDIDComponent() {
     identity.init('/identity_wasm_bg.wasm').then(() => setWasmReady(true));
   }, []);
 
-  // const handleCreateDID = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   setDid(null);
-  //   setJwk(null);
-  //   try {
-  //     if (!wasmReady) {
-  //       setError('WASM not loaded yet. Please try again in a moment.');
-  //       setLoading(false);
-  //       return;
-  //     }
-  //     // Create JWK only after WASM is ready
-      
-  //     const EXAMPLE_JWK = new identity.Jwk({
-  //       kty: identity.JwkType.Okp,
-  //       crv: identity.EdCurve.Ed25519,
-  //       x: "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
-  //     });
-  //     // Use 'rms' as the network HRP (Shimmer testnet)
-  //     const networkHrp = 'rms';
-  //     // Create a new DID document
-  //     const document = new identity.IotaDocument(networkHrp);
-  //     // Add a verification method using the hardcoded JWK
-  //     const method = identity.VerificationMethod.newFromJwk(
-  //       document.id(),
-  //       EXAMPLE_JWK,
-  //       '#key-1'
-  //     );
-  //     document.insertMethod(method, identity.MethodScope.VerificationMethod());
-  //     // Optionally, attach a method relationship
-  //     document.attachMethodRelationship(
-  //       document.id().join('#key-1'),
-  //       identity.MethodRelationship.Authentication
-  //     );
-  //     const service = new identity.Service({
-  //       id: document.id().join("#linked-domain"),
-  //       type: "LinkedDomains",
-  //       serviceEndpoint: "https://iota.org/",
-  //     });
-  //     document.insertService(service);
-    
-  //     console.log(`Created document `, JSON.stringify(document.toJSON(), null, 2));
-
-  //     setDid(document.id().toString());
-  //     setJwk(EXAMPLE_JWK.toJSON());
-  //     await initSdk();
-  //     const iotaClient = new Client({
-  //       primaryNode: "https://api.testnet.iota.cafe",
-  //       localPow: true,
-  //     });
-  
-
-  //   } catch (e: any) {
-  //     setError(e.message || 'Failed to create DID');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleCreateDID = async () => {
+    setLoading(true);
+    setError(null);
+    setDid(null);
+    setJwk(null);
     try {
-      // Load the WASM binary
-      await initIdentityWasm();
-      await identity.init(); // if identity namespace still needs init
+      if (!wasmReady) {
+        setError('WASM not loaded yet. Please try again in a moment.');
+        setLoading(false);
+        return;
+      }
+      // Create JWK only after WASM is ready
       
       const EXAMPLE_JWK = new identity.Jwk({
         kty: identity.JwkType.Okp,
         crv: identity.EdCurve.Ed25519,
         x: "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
       });
-      
-      const networkHrp = "rms";
-      const document = new IotaDocument(networkHrp);
-  
-      const method = VerificationMethod.newFromJwk(
+      // Use 'rms' as the network HRP (Shimmer testnet)
+      const networkHrp = 'rms';
+      // Create a new DID document
+      const document = new identity.IotaDocument(networkHrp);
+      // Add a verification method using the hardcoded JWK
+      const method = identity.VerificationMethod.newFromJwk(
         document.id(),
         EXAMPLE_JWK,
-        "#key-1"
+        '#key-1'
       );
-      document.insertMethod(method, MethodScope.VerificationMethod());
+      document.insertMethod(method, identity.MethodScope.VerificationMethod());
+      // Optionally, attach a method relationship
       document.attachMethodRelationship(
-        document.id().join("#key-1"),
-        MethodRelationship.Authentication
+        document.id().join('#key-1'),
+        identity.MethodRelationship.Authentication
       );
-      const service = new Service({
+      const service = new identity.Service({
         id: document.id().join("#linked-domain"),
         type: "LinkedDomains",
-        serviceEndpoint: "https://iota.org/"
+        serviceEndpoint: "https://iota.org/",
       });
       document.insertService(service);
-  
-      console.log("Prepared DID document:", document.toJSON());
-  
-       const iotaClient = new IotaClientInit({ primaryNode: "http://localhost", localPow: true });
-       console.log("iotaClient: ", iotaClient)
-       const didClient = new IotaIdentityClient(iotaClient);
-  
-      const { document: publishedDoc } = await didClient.publishDid(document);
-      setDid(publishedDoc.id().toString());
+    
+      console.log(`Created document `, JSON.stringify(document.toJSON(), null, 2));
+
+      setDid(document.id().toString());
       setJwk(EXAMPLE_JWK.toJSON());
-    } catch (err: any) {
-      setError(err.message);
+     // await initSdk();
+      // const iotaClient = new Client({
+      //   primaryNode: "https://api.testnet.iota.cafe",
+      //   localPow: true,
+      // });
+  
+
+    } catch (e: any) {
+      setError(e.message || 'Failed to create DID');
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleDownloadKeys = () => {
     if (!jwk) return;
