@@ -69,7 +69,7 @@ export const Header = ({ currentPage, onNavigate }: HeaderProps) => {
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-cyan-500/20 rounded-xl animate-pulse" />
                 )}
               </button>
-              <button
+              {/* <button
                 onClick={() => onNavigate('credentials')}
                 className={`relative flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 ease-out ${
                   currentPage === 'credentials'
@@ -84,7 +84,7 @@ export const Header = ({ currentPage, onNavigate }: HeaderProps) => {
                 {currentPage === 'credentials' && (
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-cyan-500/20 rounded-xl animate-pulse" />
                 )}
-              </button>
+              </button> */}
               <button
                 onClick={() => onNavigate('issue')}
                 className={`relative flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 ease-out ${

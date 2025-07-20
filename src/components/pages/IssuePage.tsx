@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Upload, CheckCircle, AlertCircle, Shield, Users, Award } from 'lucide-react';
 import { credentialTypes } from '../../data/credentialData';
+import { CustomSelect } from '../ui/CustomSelect';
 
 export const IssuePage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>('');
@@ -178,11 +179,11 @@ export const IssuePage: React.FC = () => {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-cyan-300">Organization:</span>
-                  <span className="text-white font-semibold">Demo University</span>
+                  <span className="text-white font-semibold">University of KL</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-cyan-300">DID:</span>
-                  <span className="text-white font-mono text-xs">did:iota:demo:12345</span>
+                  <span className="text-white font-mono text-xs">did:iota:0xe...</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-cyan-300">Verification:</span>
@@ -257,16 +258,14 @@ export const IssuePage: React.FC = () => {
                               {field.name} {field.required && '*'}
                             </label>
                             {field.type === 'select' ? (
-                              <select
-                                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20 transition-all duration-200"
+                              <CustomSelect
                                 value={formData[field.id] || ''}
-                                onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                              >
-                                <option value="">Select {field.name}</option>
-                                {field.options?.map((option) => (
-                                  <option key={option} value={option}>{option}</option>
-                                ))}
-                              </select>
+                                onChange={(value: string) => handleFieldChange(field.id, value)}
+                                options={field.options?.map(option => ({ value: option, label: option })) || []}
+                                placeholder={`Select ${field.name}`}
+                                className="w-full"
+                                required={field.required}
+                              />
                             ) : field.type === 'date' ? (
                               <input
                                 type="date"

@@ -2,7 +2,7 @@ import React from 'react';
 import { Shield, Search, TrendingUp, Users, Brain, ArrowRight, Zap, Star, Award, Wallet, CheckCircle, Trophy, Target, Key } from 'lucide-react';
 
 interface HomePageProps {
-  onNavigate: (page: 'home' | 'credentials' | 'issue' | 'wallet' | 'did') => void;
+  onNavigate: (page: 'home' | 'issue' | 'wallet' | 'did') => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {

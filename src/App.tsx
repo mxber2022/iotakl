@@ -82,9 +82,9 @@ function App() {
             {currentPage === 'home' && (
               <HomePage onNavigate={handleNavigate} />
             )}
-            {currentPage === 'credentials' && (
+            {/* {currentPage === 'credentials' && (
               <CredentialsPage />
-            )}
+            )} */}
             {currentPage === 'issue' && (
               <IssuePage />
             )}
