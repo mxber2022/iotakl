@@ -1,0 +1,13 @@
+[package]
+name = "profile_contract"
+version = "1.0.0"
+edition = "2024.beta"
+
+[dependencies]
+iota = { git = "https://github.com/iotaledger/wasp", subdir = "packages/vm/corecontracts/rust/iota" }
+isc = { git = "https://github.com/iotaledger/wasp", subdir = "packages/vm/corecontracts/rust/isc" }
+
+[addresses]
+profile_contract = "_"
+
+[dev-dependencies] 
