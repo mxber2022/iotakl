@@ -1,0 +1,28 @@
+{
+  "name": "university-notarization-api",
+  "version": "1.0.0",
+  "description": "API server for notarizing university documents using IOTA Notarization",
+  "main": "api-server.js",
+  "scripts": {
+    "start": "node api-server.js",
+    "dev": "nodemon api-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "iota",
+    "notarization",
+    "university",
+    "blockchain",
+    "api",
+    "credentials"
+  ],
+  "author": "IOTA Foundation",
+  "license": "Apache-2.0"
+} 
