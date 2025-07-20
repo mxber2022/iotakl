@@ -205,13 +205,13 @@ function ProfileCreationComponent({ did, onComplete }: ProfileCreationComponentP
   return (
     <div className="bg-neutral-950 border border-purple-800 rounded-2xl p-8">
       {step !== 3 && (
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Shield className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Create Your Profile</h2>
-          <p className="text-neutral-400">Your DID has been created successfully! Now let's set up your profile.</p>
+              <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="text-3xl">👤</div>
         </div>
+        <h2 className="text-2xl font-bold text-white mb-2">Create Your Profile</h2>
+        <p className="text-neutral-400">Your DID has been created successfully! Now let's set up your profile.</p>
+      </div>
       )}
 
       {step === 1 && (
