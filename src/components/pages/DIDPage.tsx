@@ -8,6 +8,385 @@ import initSdk, { Client } from '@iota/sdk-wasm/web';
 import init from "@iota/sdk-wasm/web";
 import { init as initIdentityWasm, IotaDocument, VerificationMethod, Service, Jwk, MethodScope, MethodRelationship, IotaIdentityClient } from "@iota/identity-wasm/web";
 import { Client as IotaClientInit } from "@iota/sdk-wasm/web";
+import { CustomSelect } from '../ui/CustomSelect';
+
+interface ProfileCreationComponentProps {
+  did: string | null;
+  onComplete: () => void;
+}
+
+function ProfileCreationComponent({ did, onComplete }: ProfileCreationComponentProps) {
+  const [profileType, setProfileType] = useState<'individual' | 'organization' | 'government'>('individual');
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
+    website: '',
+    description: '',
+    organizationType: '',
+    governmentLevel: ''
+  });
+  const [step, setStep] = useState(1);
+  const [profileCreated, setProfileCreated] = useState(false);
+
+  const handleProfileSubmit = async () => {
+    // Here you would typically save the profile data to your backend or local storage
+    console.log('Profile created:', { did, profileType, profileData });
+    
+    // Show the final step with DID and profile info
+    setProfileCreated(true);
+    setStep(3);
+  };
+
+  const getProfileFields = () => {
+    switch (profileType) {
+      case 'individual':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="Enter your full name"
+                value={profileData.name}
+                onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="Enter your email address"
+                value={profileData.email}
+                onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Bio/Description
+              </label>
+              <textarea
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="Tell us about yourself"
+                rows={3}
+                value={profileData.description}
+                onChange={(e) => setProfileData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+          </div>
+        );
+      
+      case 'organization':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Organization Name *
+              </label>
+              <input
+                type="text"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="Enter organization name"
+                value={profileData.name}
+                onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Organization Type
+              </label>
+              <CustomSelect
+                value={profileData.organizationType}
+                onChange={(value: string) => setProfileData(prev => ({ ...prev, organizationType: value }))}
+                options={[
+                  { value: 'university', label: 'University' },
+                  { value: 'company', label: 'Company' },
+                  { value: 'nonprofit', label: 'Non-profit' },
+                  { value: 'research', label: 'Research Institute' },
+                  { value: 'other', label: 'Other' }
+                ]}
+                placeholder="Select organization type"
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Website
+              </label>
+              <input
+                type="url"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="https://your-organization.com"
+                value={profileData.website}
+                onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Description
+              </label>
+              <textarea
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="Describe your organization"
+                rows={3}
+                value={profileData.description}
+                onChange={(e) => setProfileData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+          </div>
+        );
+      
+      case 'government':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Government Entity Name *
+              </label>
+              <input
+                type="text"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="Enter government entity name"
+                value={profileData.name}
+                onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Government Level
+              </label>
+              <CustomSelect
+                value={profileData.governmentLevel}
+                onChange={(value: string) => setProfileData(prev => ({ ...prev, governmentLevel: value }))}
+                options={[
+                  { value: 'federal', label: 'Federal' },
+                  { value: 'state', label: 'State/Province' },
+                  { value: 'local', label: 'Local/Municipal' },
+                  { value: 'international', label: 'International' }
+                ]}
+                placeholder="Select government level"
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Website
+              </label>
+              <input
+                type="url"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="https://government-website.gov"
+                value={profileData.website}
+                onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                Description
+              </label>
+              <textarea
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all duration-200"
+                placeholder="Describe the government entity"
+                rows={3}
+                value={profileData.description}
+                onChange={(e) => setProfileData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="bg-neutral-950 border border-purple-800 rounded-2xl p-8">
+      {step !== 3 && (
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Create Your Profile</h2>
+          <p className="text-neutral-400">Your DID has been created successfully! Now let's set up your profile.</p>
+        </div>
+      )}
+
+      {step === 1 && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">Select Profile Type</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { type: 'individual', label: 'Individual', icon: '👤', description: 'Personal profile for individuals' },
+                { type: 'organization', label: 'Organization', icon: '🏢', description: 'Business or institutional profile' },
+                { type: 'government', label: 'Government', icon: '🏛️', description: 'Government entity profile' }
+              ].map((option) => (
+                <button
+                  key={option.type}
+                  onClick={() => setProfileType(option.type as any)}
+                  className={`p-6 rounded-xl border transition-all duration-200 text-left ${
+                    profileType === option.type
+                      ? 'bg-purple-900/50 border-purple-700 text-white'
+                      : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800'
+                  }`}
+                >
+                  <div className="text-3xl mb-3">{option.icon}</div>
+                  <h4 className="font-semibold mb-2">{option.label}</h4>
+                  <p className="text-sm opacity-80">{option.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <button
+              onClick={() => setStep(2)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">Profile Information</h3>
+            {getProfileFields()}
+          </div>
+          
+          <div className="flex justify-between">
+            <button
+              onClick={() => setStep(1)}
+              className="bg-neutral-800 text-white font-semibold py-3 px-6 rounded-xl hover:bg-neutral-700 transition-all duration-200"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleProfileSubmit}
+              disabled={!profileData.name.trim()}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Create Profile
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Profile Created Successfully!</h3>
+            <p className="text-neutral-400">Your DID and profile are now ready to use.</p>
+          </div>
+
+          <div className="bg-neutral-900 border border-green-800 rounded-xl p-6">
+            <h4 className="text-lg font-semibold text-white mb-4">Your Identity Information</h4>
+            
+            <div className="space-y-4">
+              <div>
+                <span className="text-neutral-400 text-sm">DID:</span>
+                <div className="text-white font-mono break-all text-sm bg-neutral-800 p-3 rounded-lg mt-1">
+                  {did}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-neutral-400 text-sm">Profile Type:</span>
+                  <div className="text-white font-semibold capitalize">
+                    {profileType === 'individual' && '👤 Individual'}
+                    {profileType === 'organization' && '🏢 Organization'}
+                    {profileType === 'government' && '🏛️ Government'}
+                  </div>
+                </div>
+                
+                <div>
+                  <span className="text-neutral-400 text-sm">Name:</span>
+                  <div className="text-white font-semibold">{profileData.name}</div>
+                </div>
+                
+                {profileData.email && (
+                  <div>
+                    <span className="text-neutral-400 text-sm">Email:</span>
+                    <div className="text-white">{profileData.email}</div>
+                  </div>
+                )}
+                
+                {profileData.website && (
+                  <div>
+                    <span className="text-neutral-400 text-sm">Website:</span>
+                    <div className="text-white">
+                      <a href={profileData.website} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 underline">
+                        {profileData.website}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                {profileData.organizationType && (
+                  <div>
+                    <span className="text-neutral-400 text-sm">Organization Type:</span>
+                    <div className="text-white capitalize">{profileData.organizationType}</div>
+                  </div>
+                )}
+                
+                {profileData.governmentLevel && (
+                  <div>
+                    <span className="text-neutral-400 text-sm">Government Level:</span>
+                    <div className="text-white capitalize">{profileData.governmentLevel}</div>
+                  </div>
+                )}
+              </div>
+              
+              {profileData.description && (
+                <div>
+                  <span className="text-neutral-400 text-sm">Description:</span>
+                  <div className="text-white mt-1 bg-neutral-800 p-3 rounded-lg">
+                    {profileData.description}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-center space-x-4">
+            {/* <button
+              onClick={() => {
+                setStep(1);
+                setProfileCreated(false);
+                setProfileData({
+                  name: '',
+                  email: '',
+                  website: '',
+                  description: '',
+                  organizationType: '',
+                  governmentLevel: ''
+                });
+              }}
+              className="bg-neutral-800 text-white font-semibold py-3 px-6 rounded-xl hover:bg-neutral-700 transition-all duration-200"
+            >
+              Create Another Profile
+            </button>
+            <button
+              onClick={onComplete}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-500 hover:to-emerald-500 transition-all duration-300"
+            >
+              Complete Setup
+            </button> */}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function CreateDIDComponent() {
   const [loading, setLoading] = useState(false);
@@ -15,6 +394,7 @@ function CreateDIDComponent() {
   const [jwk, setJwk] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [wasmReady, setWasmReady] = useState(false);
+  const [showProfileCreation, setShowProfileCreation] = useState(false);
 
   useEffect(() => {
     identity.init('/identity_wasm_bg.wasm').then(() => setWasmReady(true));
@@ -65,6 +445,7 @@ function CreateDIDComponent() {
 
       setDid(document.id().toString());
       setJwk(EXAMPLE_JWK.toJSON());
+      setShowProfileCreation(true);
      // await initSdk();
       // const iotaClient = new Client({
       //   primaryNode: "https://api.testnet.iota.cafe",
@@ -93,38 +474,44 @@ function CreateDIDComponent() {
 
   return (
     <div className="space-y-6">
-      <button
-        onClick={handleCreateDID}
-        disabled={loading || !wasmReady}
-        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:from-purple-500 hover:to-pink-500 transition-all duration-300 disabled:opacity-60"
-      >
-        {loading ? 'Creating DID...' : 'Create New DID'}
-      </button>
-      {did && (
-        <div className="bg-neutral-900 border border-purple-800 rounded-xl p-6 mt-4">
-          <div className="mb-2 text-purple-300 font-semibold">Your new DID:</div>
-          <div className="text-white font-mono break-all mb-2">{did}</div>
-          <a
-            href={`https://explorer.iota.org/testnet/identity-resolver/${did}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-cyan-400 underline"
+      {!showProfileCreation ? (
+        <>
+          <button
+            onClick={handleCreateDID}
+            disabled={loading || !wasmReady}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:from-purple-500 hover:to-pink-500 transition-all duration-300 disabled:opacity-60"
           >
-            View on IOTA Explorer
-          </a>
-          {jwk && (
-            <div className="mt-4">
-              <button
-                onClick={handleDownloadKeys}
-                className="bg-purple-800 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+            {loading ? 'Creating DID...' : 'Create New DID'}
+          </button>
+          {did && (
+            <div className="bg-neutral-900 border border-purple-800 rounded-xl p-6 mt-4">
+              <div className="mb-2 text-purple-300 font-semibold">Your new DID:</div>
+              <div className="text-white font-mono break-all mb-2">{did}</div>
+              <a
+                href={`https://explorer.iota.org/testnet/identity-resolver/${did}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 underline"
               >
-                Download JWK (JSON)
-              </button>
+                View on IOTA Explorer
+              </a>
+              {jwk && (
+                <div className="mt-4">
+                  <button
+                    onClick={handleDownloadKeys}
+                    className="bg-purple-800 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+                  >
+                    Download JWK (JSON)
+                  </button>
+                </div>
+              )}
             </div>
           )}
-        </div>
+          {error && <div className="text-red-400 font-semibold">{error}</div>}
+        </>
+      ) : (
+        <ProfileCreationComponent did={did} onComplete={() => setShowProfileCreation(false)} />
       )}
-      {error && <div className="text-red-400 font-semibold">{error}</div>}
     </div>
   );
 }
