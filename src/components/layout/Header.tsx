@@ -117,22 +117,7 @@ export const Header = ({ currentPage, onNavigate }: HeaderProps) => {
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-cyan-500/20 rounded-xl animate-pulse" />
                 )}
               </button>
-              <button
-                onClick={() => onNavigate('profile')}
-                className={`relative flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 ease-out ${
-                  currentPage === 'profile'
-                    ? 'bg-cyan-900/50 text-white shadow-lg transform scale-[1.02]'
-                    : 'text-neutral-400 hover:text-white hover:bg-cyan-900/20 hover:scale-[1.01]'
-                }`}
-              >
-                <User className={`w-4 h-4 transition-all duration-300 ${
-                  currentPage === 'profile' ? 'text-white' : 'text-neutral-400'
-                }`} />
-                <span className="transition-all duration-300">PROFILE</span>
-                {currentPage === 'profile' && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-cyan-500/20 rounded-xl animate-pulse" />
-                )}
-              </button>
+
             </nav>
           </div>
           {/* Wallet Connect Area */}
